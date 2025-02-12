@@ -455,7 +455,7 @@ def log_stats(interval: int = 10):
                 es = engine_stats[url]
                 logstr += (
                     f" Engine Stats (Dashboard): Running Requests: {es.num_running_requests}, "
-                    f"Queueing Delay (requests): {es.num_queing_requests}, "
+                    f"Queueing Delay (requests): {es.num_queuing_requests}, "
                     f"GPU Cache Hit Rate: {es.gpu_cache_hit_rate:.2f}\n"
                 )
             else:

@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import JSONResponse, Response, StreamingResponse
-from prometheus_client import Gauge, generate_latest
+from prometheus_client import Gauge, generate_latest, CONTENT_TYPE_LATEST
 
 from vllm_router.engine_stats import GetEngineStatsScraper, InitializeEngineStatsScraper
 from vllm_router.files import initialize_storage
@@ -46,6 +46,10 @@ app = FastAPI(lifespan=lifespan)
 vnum_requests_running = Gauge(
     "vllm:num_requests_running", "Number of running requests", ["server"]
 )
+current_qps = Gauge("vllm:current_qps", "Current Queries Per Second", ["server"])
+avg_decoding_length = Gauge("vllm:avg_decoding_length", "Average Decoding Length", ["server"])
+num_prefill_requests = Gauge("vllm:num_prefill_requests", "Number of Prefill Requests", ["server"])
+num_decoding_requests = Gauge("vllm:num_decoding_requests", "Number of Decoding Requests", ["server"])
 
 # --- Request Processing & Routing --- 
 # TODO: better request id system
@@ -58,6 +62,8 @@ async def process_request(method, header, body, backend_url, request_id, endpoin
     # Record the request start time and notify the request stats monitor.
     start_time = time.time()
     GetRequestStatsMonitor().on_new_request(backend_url, request_id, start_time)
+    # Log the start of request processing
+    logger.info(f"Started request {request_id} for backend {backend_url}")
 
     client = httpx_client_wrapper()
     async with client.stream(
@@ -79,6 +85,7 @@ async def process_request(method, header, body, backend_url, request_id, endpoin
             yield chunk
 
     GetRequestStatsMonitor().on_request_complete(backend_url, request_id, time.time())
+    logger.info(f"Completed request {request_id} for backend {backend_url}")
     # Optional debug logging can be enabled here.
     # logger.debug(f"Finished the request with id: {debug_request.headers.get('x-request-id', None)} at {time.time()}")
 
@@ -110,9 +117,11 @@ async def route_general_request(request: Request, endpoint: str):
             status_code=400, content={"error": f"Model {requested_model} not found."}
         )
 
+    logger.debug(f"Routing request {request_id} for model: {requested_model}")
     server_url = GetRoutingLogic().route_request(
         endpoints, engine_stats, request_stats, request
     )
+    logger.info(f"Request {request_id} routed to {server_url}")
 
     curr_time = time.time()
     logger.info(
@@ -237,7 +246,15 @@ async def health() -> Response:
 # --- Prometheus Metrics Endpoint (v2 observation/tracking) ---
 @app.get("/metrics")
 async def metrics():
-    return Response(generate_latest(), media_type="text/plain")
+    # Update gauges with stats from the request monitor
+    stats = GetRequestStatsMonitor().get_request_stats(time.time())
+    for server, stat in stats.items():
+        current_qps.labels(server=server).set(stat.qps)
+        avg_decoding_length.labels(server=server).set(stat.ttft)
+        num_prefill_requests.labels(server=server).set(stat.in_prefill_requests)
+        num_decoding_requests.labels(server=server).set(stat.in_decoding_requests)
+        vnum_requests_running.labels(server=server).set(stat.in_prefill_requests + stat.in_decoding_requests)
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 # --- Argument Parsing and Initialization ---
 def validate_args(args):
@@ -432,36 +449,29 @@ def log_stats(interval: int = 10):
         request_stats = GetRequestStatsMonitor().get_request_stats(time.time())
         for endpoint in endpoints:
             url = endpoint.url
-            
             logstr += f"Model: {endpoint.model_name}\n"
             logstr += f"Server: {url}\n"
             if url in engine_stats:
-                num_running_requests = engine_stats[url].num_running_requests
-                num_queing_requests = engine_stats[url].num_queuing_requests
-                gpu_cache_hit_rate = engine_stats[url].gpu_cache_hit_rate
+                es = engine_stats[url]
                 logstr += (
-                    f"  Engine stats: {num_running_requests} running requests, "
-                    f"{num_queing_requests} queuing requests, {gpu_cache_hit_rate:.2f} GPU cache hit rate\n"
+                    f" Engine Stats (Dashboard): Running Requests: {es.num_running_requests}, "
+                    f"Queueing Delay (requests): {es.num_queing_requests}, "
+                    f"GPU Cache Hit Rate: {es.gpu_cache_hit_rate:.2f}\n"
                 )
             else:
-                logstr += "  Engine stats: No stats available\n"
-
+                logstr += " Engine Stats: No stats available\n"
             if url in request_stats:
-                qps = request_stats[url].qps
-                num_requests = request_stats[url].ttft
-                in_prefill_requests = request_stats[url].in_prefill_requests
-                in_decoding_requets = request_stats[url].in_decoding_requests
-                finished_requests = request_stats[url].finished_requests
-                uptime = request_stats[url].uptime
+                rs = request_stats[url]
                 logstr += (
-                    f"  Request Stats: {qps:.2f} QPS, {num_requests} TTFT, "
-                    f"{in_prefill_requests} in prefill, {in_decoding_requets} in decoding, "
-                    f"{finished_requests} finished, uptime {uptime:.2f} seconds\n"
+                    f" Request Stats (Dashboard): Current QPS: {rs.qps:.2f}, "
+                    f"Avg Decoding Length: {rs.ttft}, "
+                    f"Prefill Requests: {rs.in_prefill_requests}, "
+                    f"Decoding Requests: {rs.in_decoding_requests}, "
+                    f"Finished Requests: {rs.finished_requests}, "
+                    f"Uptime: {rs.uptime:.2f} sec\n"
                 )
-                vnum_requests_running.labels(server=url).set(qps)
             else:
-                logstr += "  Request Stats: No stats available\n"
-
+                logstr += " Request Stats: No stats available\n"
             logstr += "-" * 50 + "\n"
         logstr += "=" * 50 + "\n"
         logger.info(logstr)

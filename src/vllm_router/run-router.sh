@@ -4,7 +4,7 @@ if [[ $# -ne 1 ]]; then
     exit 1
 fi
 
-python3 router.py --port "$1" \
+python3 vllm_router/router.py --port "$1" \
     --service-discovery k8s \
     --k8s-label-selector release=test \
     --k8s-namespace default \

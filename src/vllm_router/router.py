@@ -46,6 +46,7 @@ app = FastAPI(lifespan=lifespan)
 vnum_requests_running = Gauge(
     "vllm:num_requests_running", "Number of running requests", ["server"]
 )
+<<<<<<< HEAD
 current_qps = Gauge("vllm:current_qps", "Current Queries Per Second", ["server"])
 avg_decoding_length = Gauge(
     "vllm:avg_decoding_length", "Average Decoding Length", ["server"]
@@ -63,6 +64,12 @@ num_decoding_requests = Gauge(
 async def process_request(
     method, header, body, backend_url, request_id, endpoint, debug_request=None
 ):
+=======
+
+# --- Request Processing & Routing --- 
+# TODO: better request id system
+async def process_request(method, header, body, backend_url, request_id, endpoint, debug_request=None):
+>>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
     """
     Async generator to stream data from the backend server to the client.
     """
@@ -90,16 +97,19 @@ async def process_request(
             total_len += len(chunk)
             if not first_token:
                 first_token = True
-                GetRequestStatsMonitor().on_request_response(
-                    backend_url, request_id, time.time()
-                )
+                GetRequestStatsMonitor().on_request_response(backend_url, request_id, time.time())
             yield chunk
 
     GetRequestStatsMonitor().on_request_complete(backend_url, request_id, time.time())
+<<<<<<< HEAD
     logger.info(f"Completed request {request_id} for backend {backend_url}")
     # Optional debug logging can be enabled here.
     # logger.debug(f"Finished the request with id: {debug_request.headers.get('x-request-id', None)} at {time.time()}")
 
+=======
+    # Optional debug logging can be enabled here.
+    # logger.debug(f"Finished the request with id: {debug_request.headers.get('x-request-id', None)} at {time.time()}")
+>>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
 
 async def route_general_request(request: Request, endpoint: str):
     """
@@ -157,8 +167,13 @@ async def route_general_request(request: Request, endpoint: str):
         headers={key: value for key, value in headers.items()},
     )
 
+<<<<<<< HEAD
 
 @app.post("/v1/files")
+=======
+# --- File Endpoints ---
+@app.post("/files")
+>>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
 async def route_files(request: Request):
     """Handle file upload requests that include a purpose and file data."""
     form = await request.form()
@@ -183,8 +198,12 @@ async def route_files(request: Request):
             status_code=500, content={"error": f"Failed to save file: {str(e)}"}
         )
 
+<<<<<<< HEAD
 
 @app.get("/v1/files/{file_id}")
+=======
+@app.get("/files/{file_id}")
+>>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
 async def route_get_file(file_id: str):
     try:
         file = await FILE_STORAGE.get_file(file_id)
@@ -194,8 +213,12 @@ async def route_get_file(file_id: str):
             status_code=404, content={"error": f"File {file_id} not found"}
         )
 
+<<<<<<< HEAD
 
 @app.get("/v1/files/{file_id}/content")
+=======
+@app.get("/files/{file_id}/content")
+>>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
 async def route_get_file_content(file_id: str):
     try:
         # TODO: Stream file content in chunks to support large files.
@@ -206,6 +229,7 @@ async def route_get_file_content(file_id: str):
             status_code=404, content={"error": f"File {file_id} not found"}
         )
 
+<<<<<<< HEAD
 
 @app.post("/v1/chat/completions")
 async def route_chat_completition(request: Request):
@@ -213,17 +237,28 @@ async def route_chat_completition(request: Request):
 
 
 @app.post("/v1/completions")
+=======
+# --- API Endpoints ---
+@app.post("/chat/completions")
+async def route_chat_completition(request: Request):
+    return await route_general_request(request, "/v1/chat/completions")
+
+@app.post("/completions")
+>>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
 async def route_completition(request: Request):
     return await route_general_request(request, "/v1/completions")
-
 
 @app.get("/version")
 async def show_version():
     ver = {"version": STACK_VERSION}
     return JSONResponse(content=ver)
 
+<<<<<<< HEAD
 
 @app.get("/v1/models")
+=======
+@app.get("/models")
+>>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
 async def show_models():
     endpoints = GetServiceDiscovery().get_endpoint_info()
     existing_models = set()
@@ -243,7 +278,6 @@ async def show_models():
     model_list = ModelList(data=model_cards)
     return JSONResponse(content=model_list.model_dump())
 
-
 @app.get("/health")
 async def health() -> Response:
     """Health check: verifies that service discovery and engine stats scraping are operational."""
@@ -257,7 +291,12 @@ async def health() -> Response:
         )
     return Response(status_code=200)
 
+# --- Prometheus Metrics Endpoint (v2 observation/tracking) ---
+@app.get("/metrics")
+async def metrics():
+    return Response(generate_latest(), media_type="text/plain")
 
+<<<<<<< HEAD
 # --- Prometheus Metrics Endpoint (v2 observation/tracking) ---
 @app.get("/metrics")
 async def metrics():
@@ -274,6 +313,8 @@ async def metrics():
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
+=======
+>>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
 # --- Argument Parsing and Initialization ---
 def validate_args(args):
     if args.service_discovery == "static":
@@ -467,6 +508,7 @@ def log_stats(interval: int = 10):
         request_stats = GetRequestStatsMonitor().get_request_stats(time.time())
         for endpoint in endpoints:
             url = endpoint.url
+<<<<<<< HEAD
             logstr += f"Model: {endpoint.model_name}\n"
             logstr += f"Server: {url}\n"
             if url in engine_stats:
@@ -475,10 +517,23 @@ def log_stats(interval: int = 10):
                     f" Engine Stats (Dashboard): Running Requests: {es.num_running_requests}, "
                     f"Queueing Delay (requests): {es.num_queuing_requests}, "
                     f"GPU Cache Hit Rate: {es.gpu_cache_hit_rate:.2f}\n"
+=======
+            
+            logstr += f"Model: {endpoint.model_name}\n"
+            logstr += f"Server: {url}\n"
+            if url in engine_stats:
+                num_running_requests = engine_stats[url].num_running_requests
+                num_queing_requests = engine_stats[url].num_queuing_requests
+                gpu_cache_hit_rate = engine_stats[url].gpu_cache_hit_rate
+                logstr += (
+                    f"  Engine stats: {num_running_requests} running requests, "
+                    f"{num_queing_requests} queuing requests, {gpu_cache_hit_rate:.2f} GPU cache hit rate\n"
+>>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
                 )
             else:
                 logstr += " Engine Stats: No stats available\n"
             if url in request_stats:
+<<<<<<< HEAD
                 rs = request_stats[url]
                 logstr += (
                     f" Request Stats (Dashboard): Current QPS: {rs.qps:.2f}, "
@@ -488,6 +543,20 @@ def log_stats(interval: int = 10):
                     f"Finished Requests: {rs.finished_requests}, "
                     f"Uptime: {rs.uptime:.2f} sec\n"
                 )
+=======
+                qps = request_stats[url].qps
+                num_requests = request_stats[url].ttft
+                in_prefill_requests = request_stats[url].in_prefill_requests
+                in_decoding_requets = request_stats[url].in_decoding_requests
+                finished_requests = request_stats[url].finished_requests
+                uptime = request_stats[url].uptime
+                logstr += (
+                    f"  Request Stats: {qps:.2f} QPS, {num_requests} TTFT, "
+                    f"{in_prefill_requests} in prefill, {in_decoding_requets} in decoding, "
+                    f"{finished_requests} finished, uptime {uptime:.2f} seconds\n"
+                )
+                vnum_requests_running.labels(server=url).set(qps)
+>>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
             else:
                 logstr += " Request Stats: No stats available\n"
             logstr += "-" * 50 + "\n"

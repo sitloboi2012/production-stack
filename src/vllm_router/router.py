@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import JSONResponse, Response, StreamingResponse
+from prometheus_client import Gauge, generate_latest
 
 from vllm_router.engine_stats import GetEngineStatsScraper, InitializeEngineStatsScraper
 from vllm_router.files import initialize_storage
@@ -40,18 +41,21 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# --- Observation & Tracking (from v2) ---
+# Define a Prometheus gauge for tracking the number of running requests per server.
+vnum_requests_running = Gauge(
+    "vllm:num_requests_running", "Number of running requests", ["server"]
+)
+
+# --- Request Processing & Routing --- 
 # TODO: better request id system
-
-
-async def process_request(
-    method, header, body, backend_url, request_id, endpoint, debug_request=None
-):
+async def process_request(method, header, body, backend_url, request_id, endpoint, debug_request=None):
     """
     Async generator to stream data from the backend server to the client.
     """
     first_token = False
     total_len = 0
-    # Pass response headers to the client
+    # Record the request start time and notify the request stats monitor.
     start_time = time.time()
     GetRequestStatsMonitor().on_new_request(backend_url, request_id, start_time)
 
@@ -63,33 +67,29 @@ async def process_request(
         content=body,
         timeout=None,
     ) as backend_response:
+        # Yield headers and status code first.
         yield backend_response.headers, backend_response.status_code
 
-        # Stream response content
+        # Then stream the response content in chunks.
         async for chunk in backend_response.aiter_bytes():
             total_len += len(chunk)
             if not first_token:
                 first_token = True
-                GetRequestStatsMonitor().on_request_response(
-                    backend_url, request_id, time.time()
-                )
+                GetRequestStatsMonitor().on_request_response(backend_url, request_id, time.time())
             yield chunk
 
     GetRequestStatsMonitor().on_request_complete(backend_url, request_id, time.time())
-
-    # if debug_request:
-    #    logger.debug(f"Finished the request with request id: {debug_request.headers.get('x-request-id', None)} at {time.time()}")
-
+    # Optional debug logging can be enabled here.
+    # logger.debug(f"Finished the request with id: {debug_request.headers.get('x-request-id', None)} at {time.time()}")
 
 async def route_general_request(request: Request, endpoint: str):
     """
-    Route the incoming request to the backend server and stream the response
-    back to the client.
+    Route the incoming request to the backend server and stream the response back to the client.
     """
     in_router_time = time.time()
     request_id = str(uuid.uuid4())
 
-    # TODO (ApostaC): merge two awaits into one
+    # Read the full request body and JSON payload.
     request_body = await request.body()
     request_json = await request.json()
     requested_model = request_json.get("model", None)
@@ -103,6 +103,7 @@ async def route_general_request(request: Request, endpoint: str):
     engine_stats = GetEngineStatsScraper().get_engine_stats()
     request_stats = GetRequestStatsMonitor().get_request_stats(time.time())
 
+    # Filter endpoints by the requested model.
     endpoints = list(filter(lambda x: x.model_name == requested_model, endpoints))
     if len(endpoints) == 0:
         return JSONResponse(
@@ -141,13 +142,8 @@ async def route_files(request: Request):
     """Handle file upload requests that include a purpose and file data."""
     form = await request.form()
 
-    # Validate required fields
-    if "purpose" not in form:
-        # Unlike openai, we do not support fine-tuning, so we do not need to
-        # check for 'purpose`.`
-        purpose = "unknown"
-    else:
-        purpose = form["purpose"]
+    # Validate required fields.
+    purpose = form.get("purpose", "unknown")
     if "file" not in form:
         return JSONResponse(
             status_code=400, content={"error": "Missing required parameter 'file'"}
@@ -181,8 +177,7 @@ async def route_get_file(file_id: str):
 @app.get("/v1/files/{file_id}/content")
 async def route_get_file_content(file_id: str):
     try:
-        # TODO(gaocegege): Stream the file content with chunks to support
-        # openai uploads interface.
+        # TODO: Stream file content in chunks to support large files.
         file_content = await FILE_STORAGE.get_file_content(file_id)
         return Response(content=file_content)
     except FileNotFoundError:
@@ -199,7 +194,6 @@ async def route_chat_completition(request: Request):
 @app.post("/v1/completions")
 async def route_completition(request: Request):
     return await route_general_request(request, "/v1/completions")
-
 
 @app.get("/version")
 async def show_version():
@@ -227,10 +221,9 @@ async def show_models():
     model_list = ModelList(data=model_cards)
     return JSONResponse(content=model_list.model_dump())
 
-
 @app.get("/health")
 async def health() -> Response:
-    """Health check. check the health of the threads"""
+    """Health check: verifies that service discovery and engine stats scraping are operational."""
     if not GetServiceDiscovery().get_health():
         return JSONResponse(
             content={"status": "Service discovery module is down."}, status_code=503
@@ -241,7 +234,12 @@ async def health() -> Response:
         )
     return Response(status_code=200)
 
+# --- Prometheus Metrics Endpoint (v2 observation/tracking) ---
+@app.get("/metrics")
+async def metrics():
+    return Response(generate_latest(), media_type="text/plain")
 
+# --- Argument Parsing and Initialization ---
 def validate_args(args):
     if args.service_discovery == "static":
         if args.static_backends is None:
@@ -296,14 +294,13 @@ def parse_args():
         "--static-backends",
         type=str,
         default=None,
-        help="The urls of static backends, separated by comma."
-        "E.g., http://localhost:8000,http://localhost:8001",
+        help="The URLs of static backends, separated by commas. E.g., http://localhost:8000,http://localhost:8001",
     )
     parser.add_argument(
         "--static-models",
         type=str,
         default=None,
-        help="The models of static backends, separated by comma. E.g., model1,model2",
+        help="The models of static backends, separated by commas. E.g., model1,model2",
     )
     parser.add_argument(
         "--k8s-port",
@@ -340,7 +337,6 @@ def parse_args():
     )
 
     # Batch API
-    # TODO(gaocegege): Make these batch api related arguments to a separate config.
     parser.add_argument(
         "--file-storage-class",
         type=str,
@@ -366,14 +362,13 @@ def parse_args():
         "--request-stats-window",
         type=int,
         default=60,
-        help="The sliding window seconds to compute request statistics.",
+        help="The sliding window in seconds to compute request statistics.",
     )
 
     # Logging
     parser.add_argument(
         "--log-stats", action="store_true", help="Log statistics periodically."
     )
-
     parser.add_argument(
         "--log-stats-interval",
         type=int,
@@ -392,7 +387,7 @@ def parse_static_urls(args):
         if validate_url(url):
             backend_urls.append(url)
         else:
-            logger.warning(f"Skipping invalid url: {url}")
+            logger.warning(f"Skipping invalid URL: {url}")
     return backend_urls
 
 
@@ -421,8 +416,7 @@ def InitializeAll(args):
     InitializeEngineStatsScraper(args.engine_stats_interval)
     InitializeRequestStatsMonitor(args.request_stats_window)
 
-    # TODO(gaocegege): Try adopting a more general way to initialize the
-    # storage, and global router. Maybe singleton?
+    # Initialize the file storage system.
     global FILE_STORAGE
     FILE_STORAGE = initialize_storage(args.file_storage_class, args.file_storage_path)
 
@@ -438,14 +432,33 @@ def log_stats(interval: int = 10):
         request_stats = GetRequestStatsMonitor().get_request_stats(time.time())
         for endpoint in endpoints:
             url = endpoint.url
+            
+            logstr += f"Model: {endpoint.model_name}\n"
             logstr += f"Server: {url}\n"
             if url in engine_stats:
-                logstr += f"  Engine stats: {engine_stats[url]}\n"
+                num_running_requests = engine_stats[url].num_running_requests
+                num_queing_requests = engine_stats[url].num_queuing_requests
+                gpu_cache_hit_rate = engine_stats[url].gpu_cache_hit_rate
+                logstr += (
+                    f"  Engine stats: {num_running_requests} running requests, "
+                    f"{num_queing_requests} queuing requests, {gpu_cache_hit_rate:.2f} GPU cache hit rate\n"
+                )
             else:
                 logstr += "  Engine stats: No stats available\n"
 
             if url in request_stats:
-                logstr += f"  Request Stats: {request_stats[url]}\n"
+                qps = request_stats[url].qps
+                num_requests = request_stats[url].ttft
+                in_prefill_requests = request_stats[url].in_prefill_requests
+                in_decoding_requets = request_stats[url].in_decoding_requests
+                finished_requests = request_stats[url].finished_requests
+                uptime = request_stats[url].uptime
+                logstr += (
+                    f"  Request Stats: {qps:.2f} QPS, {num_requests} TTFT, "
+                    f"{in_prefill_requests} in prefill, {in_decoding_requets} in decoding, "
+                    f"{finished_requests} finished, uptime {uptime:.2f} seconds\n"
+                )
+                vnum_requests_running.labels(server=url).set(qps)
             else:
                 logstr += "  Request Stats: No stats available\n"
 
@@ -456,14 +469,11 @@ def log_stats(interval: int = 10):
 
 def main():
     args = parse_args()
-
     InitializeAll(args)
-
     if args.log_stats:
         threading.Thread(
             target=log_stats, args=(args.log_stats_interval,), daemon=True
         ).start()
-
     uvicorn.run(app, host=args.host, port=args.port)
 
 

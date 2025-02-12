@@ -8,6 +8,13 @@ The observability stack is based on [kube-prom-stack](https://github.com/prometh
 
 To launch the observability stack:
 
+Make sure to have:
+
+- A running Kubernetes (K8s) environment with GPUs
+  - Run `cd utils && bash install-minikube-cluster.sh`
+  - Or follow our [tutorial](tutorials/00-install-kubernetes-env.md)
+
+After that you can run:
 ```bash
 sudo bash install.sh
 ```

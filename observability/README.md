@@ -15,10 +15,7 @@ Make sure to have:
   - Or follow our [tutorial](tutorials/00-install-kubernetes-env.md)
 
 After that you can run:
-<<<<<<< HEAD
 
-=======
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
 ```bash
 sudo bash install.sh
 ```

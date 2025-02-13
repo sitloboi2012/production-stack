@@ -1,10 +1,5 @@
 fastapi
 httpx
-<<<<<<< HEAD
-openai
-uvicorn
-=======
->>>>>>> 2ba572e (run pre-commit for linting)
 openai
 uvicorn
 vllm

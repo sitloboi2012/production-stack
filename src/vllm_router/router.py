@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI, Request, UploadFile
 from fastapi.responses import JSONResponse, Response, StreamingResponse
-from prometheus_client import Gauge, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import CONTENT_TYPE_LATEST, Gauge, generate_latest
 
 from vllm_router.engine_stats import GetEngineStatsScraper, InitializeEngineStatsScraper
 from vllm_router.files import initialize_storage
@@ -47,13 +47,22 @@ vnum_requests_running = Gauge(
     "vllm:num_requests_running", "Number of running requests", ["server"]
 )
 current_qps = Gauge("vllm:current_qps", "Current Queries Per Second", ["server"])
-avg_decoding_length = Gauge("vllm:avg_decoding_length", "Average Decoding Length", ["server"])
-num_prefill_requests = Gauge("vllm:num_prefill_requests", "Number of Prefill Requests", ["server"])
-num_decoding_requests = Gauge("vllm:num_decoding_requests", "Number of Decoding Requests", ["server"])
+avg_decoding_length = Gauge(
+    "vllm:avg_decoding_length", "Average Decoding Length", ["server"]
+)
+num_prefill_requests = Gauge(
+    "vllm:num_prefill_requests", "Number of Prefill Requests", ["server"]
+)
+num_decoding_requests = Gauge(
+    "vllm:num_decoding_requests", "Number of Decoding Requests", ["server"]
+)
 
-# --- Request Processing & Routing --- 
+
+# --- Request Processing & Routing ---
 # TODO: better request id system
-async def process_request(method, header, body, backend_url, request_id, endpoint, debug_request=None):
+async def process_request(
+    method, header, body, backend_url, request_id, endpoint, debug_request=None
+):
     """
     Async generator to stream data from the backend server to the client.
     """
@@ -81,13 +90,16 @@ async def process_request(method, header, body, backend_url, request_id, endpoin
             total_len += len(chunk)
             if not first_token:
                 first_token = True
-                GetRequestStatsMonitor().on_request_response(backend_url, request_id, time.time())
+                GetRequestStatsMonitor().on_request_response(
+                    backend_url, request_id, time.time()
+                )
             yield chunk
 
     GetRequestStatsMonitor().on_request_complete(backend_url, request_id, time.time())
     logger.info(f"Completed request {request_id} for backend {backend_url}")
     # Optional debug logging can be enabled here.
     # logger.debug(f"Finished the request with id: {debug_request.headers.get('x-request-id', None)} at {time.time()}")
+
 
 async def route_general_request(request: Request, endpoint: str):
     """
@@ -204,6 +216,7 @@ async def route_chat_completition(request: Request):
 async def route_completition(request: Request):
     return await route_general_request(request, "/v1/completions")
 
+
 @app.get("/version")
 async def show_version():
     ver = {"version": STACK_VERSION}
@@ -230,6 +243,7 @@ async def show_models():
     model_list = ModelList(data=model_cards)
     return JSONResponse(content=model_list.model_dump())
 
+
 @app.get("/health")
 async def health() -> Response:
     """Health check: verifies that service discovery and engine stats scraping are operational."""
@@ -243,6 +257,7 @@ async def health() -> Response:
         )
     return Response(status_code=200)
 
+
 # --- Prometheus Metrics Endpoint (v2 observation/tracking) ---
 @app.get("/metrics")
 async def metrics():
@@ -253,8 +268,11 @@ async def metrics():
         avg_decoding_length.labels(server=server).set(stat.ttft)
         num_prefill_requests.labels(server=server).set(stat.in_prefill_requests)
         num_decoding_requests.labels(server=server).set(stat.in_decoding_requests)
-        vnum_requests_running.labels(server=server).set(stat.in_prefill_requests + stat.in_decoding_requests)
+        vnum_requests_running.labels(server=server).set(
+            stat.in_prefill_requests + stat.in_decoding_requests
+        )
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
 
 # --- Argument Parsing and Initialization ---
 def validate_args(args):

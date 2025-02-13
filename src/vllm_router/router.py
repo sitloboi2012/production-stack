@@ -158,12 +158,7 @@ async def route_general_request(request: Request, endpoint: str):
     )
 
 
-<<<<<<< HEAD
 @app.post("/v1/files")
-=======
-# --- File Endpoints ---
-@app.post("/files")
->>>>>>> 2ba572e (run pre-commit for linting)
 async def route_files(request: Request):
     """Handle file upload requests that include a purpose and file data."""
     form = await request.form()
@@ -189,11 +184,7 @@ async def route_files(request: Request):
         )
 
 
-<<<<<<< HEAD
 @app.get("/v1/files/{file_id}")
-=======
-@app.get("/files/{file_id}")
->>>>>>> 2ba572e (run pre-commit for linting)
 async def route_get_file(file_id: str):
     try:
         file = await FILE_STORAGE.get_file(file_id)
@@ -204,11 +195,7 @@ async def route_get_file(file_id: str):
         )
 
 
-<<<<<<< HEAD
 @app.get("/v1/files/{file_id}/content")
-=======
-@app.get("/files/{file_id}/content")
->>>>>>> 2ba572e (run pre-commit for linting)
 async def route_get_file_content(file_id: str):
     try:
         # TODO: Stream file content in chunks to support large files.
@@ -220,21 +207,12 @@ async def route_get_file_content(file_id: str):
         )
 
 
-<<<<<<< HEAD
 @app.post("/v1/chat/completions")
-=======
-# --- API Endpoints ---
-@app.post("/chat/completions")
->>>>>>> 2ba572e (run pre-commit for linting)
 async def route_chat_completition(request: Request):
     return await route_general_request(request, "/v1/chat/completions")
 
 
-<<<<<<< HEAD
 @app.post("/v1/completions")
-=======
-@app.post("/completions")
->>>>>>> 2ba572e (run pre-commit for linting)
 async def route_completition(request: Request):
     return await route_general_request(request, "/v1/completions")
 
@@ -245,11 +223,7 @@ async def show_version():
     return JSONResponse(content=ver)
 
 
-<<<<<<< HEAD
 @app.get("/v1/models")
-=======
-@app.get("/models")
->>>>>>> 2ba572e (run pre-commit for linting)
 async def show_models():
     endpoints = GetServiceDiscovery().get_endpoint_info()
     existing_models = set()
@@ -288,6 +262,7 @@ async def health() -> Response:
 @app.get("/metrics")
 async def metrics():
     return Response(generate_latest(), media_type="text/plain")
+
 
 # --- Prometheus Metrics Endpoint (v2 observation/tracking) ---
 @app.get("/metrics")

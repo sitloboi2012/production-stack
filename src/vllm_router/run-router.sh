@@ -19,8 +19,11 @@ python3 -m vllm_router.router --port "$1" \
     --service-discovery static \
     --static-backends "http://localhost:9000" \
     --static-models "fake_model_name" \
-    --engine-stats-interval 10 \
     --log-stats \
+    --log-stats-interval 10 \
+    --engine-stats-interval 10 \
+    --request-stats-window 10 \
+    --request-stats-window 10 \
     --routing-logic session \
     --session-key "x-user-id"
 

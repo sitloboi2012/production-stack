@@ -1,6 +1,6 @@
 from collections import deque
 from dataclasses import dataclass
-from typing import Deque, Dict
+from typing import Deque, Dict, Tuple
 
 from vllm_router.log import init_logger
 
@@ -13,63 +13,56 @@ _global_request_stats_monitor = None
 class RequestStats:
     # Number of queries per second
     qps: float
-
-    # Average time-to-first-token in seconds
+    # Average time-to-first-token (TTFT) in seconds
     ttft: float
-
     # Total number of requests during prefilling
     in_prefill_requests: int
-
     # Total number of requests during decoding
     in_decoding_requests: int
-
     # Total number of requests finished
     finished_requests: int
-
-    # How long does this url serves requests
-    # NOTE (ApostaC): consider moving this to engine stats
+    # How long the engine has been serving requests (uptime)
     uptime: int
+    # Average decoding length (time from first token to completion)
+    avg_decoding_length: float
+    # Average overall latency (from request arrival to completion)
+    avg_latency: float
+    # Average inter-token latency (if available; default -1 if not computed)
+    avg_itl: float
+    # Number of swapped requests (moved from GPU to CPU)
+    num_swapped_requests: int
 
 
 class MovingAverageMonitor:
     """
-    Monitors the average of the value of in a sliding window
+    Monitors the average of values in a sliding window.
     """
 
     def __init__(self, sliding_window_size: float):
         self.sliding_window_size = sliding_window_size
-        self.timestamps = deque()
-        self.values = deque()
+        self.timestamps: Deque[float] = deque()
+        self.values: Deque[float] = deque()
 
     def update(self, timestamp: float, value: float):
-        """
-        Update the throughput monitor with a new timestamp
-        """
         self.timestamps.append(timestamp)
         self.values.append(value)
         while (
-            len(self.timestamps) > 0
+            self.timestamps
             and self.timestamps[0] < timestamp - self.sliding_window_size
         ):
             self.timestamps.popleft()
             self.values.popleft()
 
     def get_average(self) -> float:
-        """
-        Get the throughput in the sliding window
-        """
-        return sum(self.values) / len(self.values)
+        return sum(self.values) / len(self.values) if self.values else -1
 
     def get_sum(self) -> float:
-        """
-        Get the sum of the values in the sliding window
-        """
         return sum(self.values)
 
 
 class RequestStatsMonitor:
     """
-    Monitors the request statistics of all serving engines
+    Monitors the request statistics of all serving engines.
     """
 
     # NOTE (ApostaC): Currently, QPS is calculated based on the number of
@@ -84,20 +77,28 @@ class RequestStatsMonitor:
         """
         self.sliding_window_size = sliding_window_size
 
-        # Finished requests for each serving engine
-        # The elements in the deque should be sorted by 'complete' time
+        # Monitors for calculating QPS and TTFT
         self.qps_monitors: Dict[str, MovingAverageMonitor] = {}
         self.ttft_monitors: Dict[str, MovingAverageMonitor] = {}
 
-        # The time when the request is coming (engine_url, request_id) -> timestamp
-        self.request_coming_time: Dict[(str, str), float] = {}
+        # Record initial request start time: (engine_url, request_id) -> timestamp
+        self.request_start_time: Dict[Tuple[str, str], float] = {}
+        # Record time when first token is received: (engine_url, request_id) -> timestamp
+        self.first_token_time: Dict[Tuple[str, str], float] = {}
 
-        # Number of requests in different stages (from the start of the router)
+        # Counters for requests in different stages
         self.in_prefill_requests: Dict[str, int] = {}
         self.in_decoding_requests: Dict[str, int] = {}
         self.finished_requests: Dict[str, int] = {}
 
-        self.first_query_time = None
+        # New monitors for overall latency and decoding length
+        self.latency_monitors: Dict[str, MovingAverageMonitor] = {}
+        self.decoding_length_monitors: Dict[str, MovingAverageMonitor] = {}
+
+        # Counter for swapped requests
+        self.swapped_requests: Dict[str, int] = {}
+
+        self.first_query_time: float = None
 
     def on_new_request(self, engine_url: str, request_id: str, timestamp: float):
         """
@@ -108,7 +109,7 @@ class RequestStatsMonitor:
             request_id: The global request ID
             timestamp: the timestamp when the request was created
         """
-        self.request_coming_time[(engine_url, request_id)] = timestamp
+        self.request_start_time[(engine_url, request_id)] = timestamp
 
         if engine_url not in self.in_prefill_requests:
             self.in_prefill_requests[engine_url] = 0
@@ -118,7 +119,6 @@ class RequestStatsMonitor:
             self.qps_monitors[engine_url] = MovingAverageMonitor(
                 self.sliding_window_size
             )
-
         self.qps_monitors[engine_url].update(timestamp, 1)
 
         if self.first_query_time is None:
@@ -133,20 +133,25 @@ class RequestStatsMonitor:
             request_id: The global request ID
             timestamp: The timestamp when the response token was received
         """
-        if (engine_url, request_id) not in self.request_coming_time:
+        if (engine_url, request_id) not in self.request_start_time:
             return
-        coming_time = self.request_coming_time.pop((engine_url, request_id))
+        # Record first token time (do not pop so we can compute overall latency later)
+        self.first_token_time[(engine_url, request_id)] = timestamp
 
         if engine_url not in self.in_decoding_requests:
             self.in_decoding_requests[engine_url] = 0
-        self.in_prefill_requests[engine_url] -= 1
+        self.in_prefill_requests[engine_url] = max(
+            0, self.in_prefill_requests.get(engine_url, 1) - 1
+        )
         self.in_decoding_requests[engine_url] += 1
 
         if engine_url not in self.ttft_monitors:
             self.ttft_monitors[engine_url] = MovingAverageMonitor(
                 self.sliding_window_size
             )
-        self.ttft_monitors[engine_url].update(timestamp, timestamp - coming_time)
+        # Update TTFT as time from request start to first token
+        ttft = timestamp - self.request_start_time[(engine_url, request_id)]
+        self.ttft_monitors[engine_url].update(timestamp, ttft)
 
     def on_request_complete(self, engine_url: str, request_id: str, timestamp: float):
         """
@@ -159,33 +164,39 @@ class RequestStatsMonitor:
         """
         if engine_url not in self.finished_requests:
             self.finished_requests[engine_url] = 0
-        self.in_decoding_requests[engine_url] -= 1
+        self.in_decoding_requests[engine_url] = max(
+            0, self.in_decoding_requests.get(engine_url, 1) - 1
+        )
         self.finished_requests[engine_url] += 1
 
-    def get_request_stats(
-        self,
-        current_time: float,
-    ) -> Dict[str, RequestStats]:
+    def on_request_swapped(self, engine_url: str, request_id: str, timestamp: float):
+        # This function should be called if a request is determined to be swapped from GPU to CPU.
         """
-        Get the request statistics for each serving engine
+        Tell the monitor that a request has been swapped from GPU to CPU.
 
         Args:
-            current_time: The current timestamp in seconds
+            engine_url: The URL of the serving engine
+            request_id: The global request ID
+            timestamp: The timestamp when the request was swapped
+        """
+        if engine_url not in self.swapped_requests:
+            self.swapped_requests[engine_url] = 0
+        self.swapped_requests[engine_url] += 1
+
+    def get_request_stats(self, current_time: float) -> Dict[str, RequestStats]:
+        """
+        Get the request statistics from the monitor.
+
+        Args:
+            current_time: The current timestamp
 
         Returns:
-            A dictionary where the key is the serving engine URL and the value
-            is the request statistics for that engine.
-            The TTFT and inter token latency will be -1 if there is no requests
-            finished in the sliding window.
+            A dictionary mapping engine URLs to RequestStats objects
         """
-        # Calculate the request statistics
         ret = {}
-
-        # Get all urls:
         urls = set(self.in_prefill_requests.keys()).union(
             set(self.in_decoding_requests.keys())
         )
-
         for engine_url in urls:
             if engine_url not in self.qps_monitors:
                 qps = -1
@@ -197,19 +208,42 @@ class RequestStatsMonitor:
             else:
                 ttft = self.ttft_monitors[engine_url].get_average()
 
-            in_prefill_requests = self.in_prefill_requests.get(engine_url, 0)
-            in_decoding_requests = self.in_decoding_requests.get(engine_url, 0)
-            finished_requests = self.finished_requests.get(engine_url, 0)
+            in_prefill = self.in_prefill_requests.get(engine_url, 0)
+            in_decoding = self.in_decoding_requests.get(engine_url, 0)
+            finished = self.finished_requests.get(engine_url, 0)
+
+            if engine_url in self.decoding_length_monitors:
+                avg_dec_len = self.decoding_length_monitors[engine_url].get_average()
+            else:
+                avg_dec_len = -1
+
+            if engine_url in self.latency_monitors:
+                avg_lat = self.latency_monitors[engine_url].get_average()
+            else:
+                avg_lat = -1
+
+            # For avg_itl, if not computed, default to -1.
+            avg_itl_val = -1
+
+            if engine_url in self.swapped_requests:
+                swapped = self.swapped_requests[engine_url]
+            else:
+                swapped = 0
 
             ret[engine_url] = RequestStats(
                 qps=qps,
                 ttft=ttft,
-                in_prefill_requests=in_prefill_requests,
-                in_decoding_requests=in_decoding_requests,
-                finished_requests=finished_requests,
-                uptime=current_time - self.first_query_time,
+                in_prefill_requests=in_prefill,
+                in_decoding_requests=in_decoding,
+                finished_requests=finished,
+                uptime=(
+                    current_time - self.first_query_time if self.first_query_time else 0
+                ),
+                avg_decoding_length=avg_dec_len,
+                avg_latency=avg_lat,
+                avg_itl=avg_itl_val,
+                num_swapped_requests=swapped,
             )
-
         return ret
 
 
@@ -227,7 +261,6 @@ def InitializeRequestStatsMonitor(sliding_window_size: float):
     global _global_request_stats_monitor
     if _global_request_stats_monitor is not None:
         raise ValueError("The global request statistics monitor has been initialized")
-
     _global_request_stats_monitor = RequestStatsMonitor(sliding_window_size)
     return _global_request_stats_monitor
 
@@ -247,5 +280,4 @@ def GetRequestStatsMonitor():
         raise ValueError(
             "The global request statistics monitor has not been initialized"
         )
-
     return _global_request_stats_monitor

@@ -25,16 +25,16 @@
       "id": 100,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
       "collapsed": false,
-      "title": "Overview of the system",
+      "title": "Overview System Performance",
       "type": "row"
     },
     {
       "id": 1,
       "type": "stat",
       "title": "Available vLLM instances",
-      "description": "Number of healthy vLLM instances",
+      "description": "Number of healthy vLLM instances (by instance usage)",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 1 },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 1 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -73,11 +73,52 @@
       ]
     },
     {
+      "id": 19,
+      "type": "stat",
+      "title": "Average Latency",
+      "description": "Average end-to-end request latency in seconds",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 1 },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "expr": "avg(vllm:e2e_request_latency_seconds_sum) / avg(vllm:e2e_request_latency_seconds_count)",
+          "editorMode": "builder",
+          "legendFormat": "Avg Latency",
+          "refId": "A",
+          "range": true
+        }
+      ]
+    },
+    {
       "id": 2,
       "type": "bargauge",
       "title": "Request latency distribution",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 9, "x": 6, "y": 1 },
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 8 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -119,7 +160,7 @@
     },
     {
       "id": 101,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 8 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
       "collapsed": false,
       "title": "QoS Information",
       "type": "row"
@@ -129,7 +170,7 @@
       "type": "stat",
       "title": "Current QPS",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 9 },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 16 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -165,11 +206,132 @@
       ]
     },
     {
+      "id": 5,
+      "type": "stat",
+      "title": "Router-side Queueing Delay",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 16 },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "expr": "vllm:router_queueing_delay_seconds",
+          "editorMode": "builder",
+          "legendFormat": "Queueing Delay",
+          "refId": "A",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Average Prefill Length",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 23 },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "expr": "vllm:avg_prefill_length",
+          "editorMode": "builder",
+          "legendFormat": "Avg. Prefill Length",
+          "refId": "A",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "stat",
+      "title": "Average ITL",
+      "description": "Average Inter-Token Latency",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 23 },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "expr": "avg(vllm:time_per_output_token_seconds_sum) / avg(vllm:time_per_output_token_seconds_count)",
+          "editorMode": "builder",
+          "legendFormat": "Avg ITL",
+          "refId": "A",
+          "range": true
+        }
+      ]
+    },
+    {
       "id": 4,
       "type": "bargauge",
       "title": "Request TTFT distribution",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 9 },
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 30 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -210,208 +372,8 @@
       ]
     },
     {
-      "id": 5,
-      "type": "stat",
-      "title": "Router-side Queueing Delay",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 9 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        {
-          "expr": "vllm:router_queueing_delay_seconds",
-          "editorMode": "builder",
-          "legendFormat": "Queueing Delay",
-          "refId": "A",
-          "range": true
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "type": "stat",
-      "title": "Average Prefill Length",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 9 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        {
-          "expr": "vllm:avg_prefill_length",
-          "editorMode": "builder",
-          "legendFormat": "Avg. Prefill Length",
-          "refId": "A",
-          "range": true
-        }
-      ]
-    },
-    {
-      "id": 7,
-      "type": "timeseries",
-      "title": "Number of Prefilling Requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 16 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        {
-          "expr": "vllm:num_prefill_requests",
-          "editorMode": "builder",
-          "legendFormat": "Prefilling Requests",
-          "refId": "A",
-          "range": true
-        }
-      ]
-    },
-    {
-      "id": 8,
-      "type": "timeseries",
-      "title": "Number of Decoding Requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 16 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        {
-          "expr": "vllm:num_decoding_requests",
-          "editorMode": "builder",
-          "legendFormat": "Decoding Requests",
-          "refId": "A",
-          "range": true
-        }
-      ]
-    },
-    {
-      "id": 9,
-      "type": "stat",
-      "title": "Average Decoding Length",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 16 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        {
-          "expr": "vllm:avg_decoding_length",
-          "editorMode": "builder",
-          "legendFormat": "Avg. Decoding Length",
-          "refId": "A",
-          "range": true
-        }
-      ]
-    },
-    {
       "id": 102,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 37 },
       "collapsed": false,
       "title": "Serving Engine Load",
       "type": "row",
@@ -422,7 +384,7 @@
       "type": "timeseries",
       "title": "Number of Running Requests",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 38 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -438,12 +400,7 @@
         "overrides": []
       },
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
@@ -462,7 +419,7 @@
       "type": "timeseries",
       "title": "Number of Pending Requests",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 38 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -478,12 +435,7 @@
         "overrides": []
       },
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
@@ -502,7 +454,7 @@
       "type": "timeseries",
       "title": "GPU KV Usage Percentage",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 38 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -518,12 +470,7 @@
         "overrides": []
       },
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
@@ -542,7 +489,7 @@
       "type": "timeseries",
       "title": "GPU KV Cache Hit Rate",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 46 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -558,12 +505,7 @@
         "overrides": []
       },
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
@@ -578,8 +520,49 @@
       ]
     },
     {
+      "id": 21,
+      "type": "stat",
+      "title": "Number of Swapped Requests",
+      "description": "Requests moved from GPU to CPU",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 46 },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 0 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "expr": "vllm:num_requests_swapped",
+          "editorMode": "builder",
+          "legendFormat": "Swapped Requests",
+          "refId": "A",
+          "range": true
+        }
+      ]
+    },
+    {
       "id": 103,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 55 },
       "collapsed": false,
       "title": "Current Resource Usage",
       "type": "row",
@@ -590,7 +573,7 @@
       "type": "timeseries",
       "title": "GPU Usage",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 42 },
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 56 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -606,12 +589,7 @@
         "overrides": []
       },
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
@@ -630,7 +608,7 @@
       "type": "timeseries",
       "title": "CPU Usage",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 42 },
+      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 56 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -646,12 +624,7 @@
         "overrides": []
       },
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
@@ -670,7 +643,7 @@
       "type": "timeseries",
       "title": "Memory Usage",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 42 },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 56 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -686,12 +659,7 @@
         "overrides": []
       },
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
@@ -710,7 +678,7 @@
       "type": "timeseries",
       "title": "Disk Usage",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 42 },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 56 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -726,12 +694,7 @@
         "overrides": []
       },
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
+        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",

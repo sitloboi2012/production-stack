@@ -25,15 +25,7 @@
       "id": 100,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
       "collapsed": false,
-<<<<<<< HEAD
-<<<<<<< HEAD
       "title": "Overview of the system",
-=======
-      "title": "Core vLLM Metrics",
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-      "title": "Overview of the system",
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
       "type": "row"
     },
     {
@@ -63,15 +55,7 @@
         "justifyMode": "auto",
         "orientation": "auto",
         "percentChangeColorMode": "standard",
-<<<<<<< HEAD
-<<<<<<< HEAD
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false },
-=======
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false },
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
         "showPercentChange": false,
         "textMode": "auto",
         "wideLayout": true
@@ -110,19 +94,16 @@
       },
       "options": {
         "displayMode": "gradient",
-        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "showUnfilled": true,
         "sizing": "auto",
         "valueMode": "color",
-<<<<<<< HEAD
-<<<<<<< HEAD
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }
-=======
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
       },
       "pluginVersion": "11.4.0",
       "targets": [
@@ -135,22 +116,6 @@
           "range": true
         }
       ]
-<<<<<<< HEAD
-    },
-    {
-      "id": 101,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 8 },
-      "collapsed": false,
-      "title": "QoS Information",
-      "type": "row"
-    },
-    {
-      "id": 3,
-      "type": "stat",
-      "title": "Current QPS",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 9 },
-=======
     },
     {
       "id": 101,
@@ -184,13 +149,19 @@
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false },
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "textMode": "auto",
         "wideLayout": true
       },
       "pluginVersion": "11.4.0",
       "targets": [
-        { "expr": "vllm:current_qps", "editorMode": "builder", "legendFormat": "Current QPS", "refId": "A", "range": true }
+        {
+          "expr": "vllm:current_qps",
+          "editorMode": "builder",
+          "legendFormat": "Current QPS",
+          "refId": "A",
+          "range": true
+        }
       ]
     },
     {
@@ -198,12 +169,7 @@
       "type": "bargauge",
       "title": "Request TTFT distribution",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-<<<<<<< HEAD
-      "gridPos": { "h": 7, "w": 9, "x": 15, "y": 1 },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
       "gridPos": { "h": 7, "w": 6, "x": 6, "y": 9 },
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -219,40 +185,20 @@
         "overrides": []
       },
       "options": {
-<<<<<<< HEAD
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "vllm:current_qps", "editorMode": "builder", "legendFormat": "Current QPS", "refId": "A", "range": true }
-      ]
-    },
-    {
-      "id": 4,
-      "type": "bargauge",
-      "title": "Request TTFT distribution",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 9 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-=======
         "displayMode": "gradient",
-        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
         "showUnfilled": true,
         "sizing": "auto",
         "valueMode": "color",
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
       },
       "pluginVersion": "11.4.0",
       "targets": [
-<<<<<<< HEAD
         {
           "expr": "sum by(le) (vllm:time_to_first_token_seconds_bucket)",
           "editorMode": "builder",
@@ -264,69 +210,7 @@
       ]
     },
     {
-      "id": 101,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 8 },
-      "collapsed": false,
-      "title": "Operational Metrics",
-      "type": "row",
-      "note": "Metrics related to the operational state of the vLLM instances."
-    },
-    {
-      "id": 4,
-      "type": "timeseries",
-      "title": "Number of running requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-<<<<<<< HEAD
-        "displayMode": "gradient",
-        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": false },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color",
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "sum by(le) (vllm:time_to_first_token_seconds_bucket)", "editorMode": "builder", "legendFormat": "__auto", "refId": "A", "range": true }
-=======
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        {
-          "expr": "vllm:num_requests_running",
-          "editorMode": "builder",
-          "legendFormat": "{{instance}}",
-          "refId": "A",
-          "range": true
-        }
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-        { "expr": "sum by(le) (vllm:time_to_first_token_seconds_bucket)", "editorMode": "builder", "legendFormat": "__auto", "refId": "A", "range": true }
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-      ]
-    },
-    {
       "id": 5,
-<<<<<<< HEAD
-<<<<<<< HEAD
       "type": "stat",
       "title": "Router-side Queueing Delay",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -334,23 +218,6 @@
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
-=======
-      "type": "timeseries",
-      "title": "GPU KV Usage percent",
-=======
-      "type": "stat",
-      "title": "Router-side Queueing Delay",
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 9 },
-      "fieldConfig": {
-        "defaults": {
-<<<<<<< HEAD
-          "color": { "mode": "palette-classic" },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-          "color": { "mode": "thresholds" },
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -363,324 +230,31 @@
         "overrides": []
       },
       "options": {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
         "colorMode": "value",
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false },
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "textMode": "auto",
         "wideLayout": true
-<<<<<<< HEAD
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "vllm:router_queueing_delay_seconds", "editorMode": "builder", "legendFormat": "Queueing Delay", "refId": "A", "range": true }
-=======
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "vllm:gpu_cache_usage_perc",
+          "expr": "vllm:router_queueing_delay_seconds",
           "editorMode": "builder",
-          "legendFormat": "{{instance}}",
+          "legendFormat": "Queueing Delay",
           "refId": "A",
           "range": true
         }
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "vllm:router_queueing_delay_seconds", "editorMode": "builder", "legendFormat": "Queueing Delay", "refId": "A", "range": true }
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
       ]
     },
     {
       "id": 6,
-<<<<<<< HEAD
-<<<<<<< HEAD
       "type": "stat",
       "title": "Average Prefill Length",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 7, "w": 6, "x": 18, "y": 9 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-=======
-      "type": "timeseries",
-      "title": "Number of pending requests",
-=======
-      "type": "stat",
-      "title": "Average Prefill Length",
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 9 },
-      "fieldConfig": {
-        "defaults": {
-<<<<<<< HEAD
-          "color": { "mode": "palette-classic" },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-          "color": { "mode": "thresholds" },
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false },
-        "textMode": "auto",
-        "wideLayout": true
-<<<<<<< HEAD
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "vllm:avg_prefill_length", "editorMode": "builder", "legendFormat": "Avg. Prefill Length", "refId": "A", "range": true }
-=======
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        {
-          "expr": "vllm:num_requests_waiting",
-          "editorMode": "builder",
-          "legendFormat": "{{instance}}",
-          "refId": "A",
-          "range": true
-        }
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "vllm:avg_prefill_length", "editorMode": "builder", "legendFormat": "Avg. Prefill Length", "refId": "A", "range": true }
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-      ]
-    },
-    {
-      "id": 7,
-      "type": "timeseries",
-<<<<<<< HEAD
-<<<<<<< HEAD
-      "title": "Number of Prefilling Requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 16 },
-=======
-      "title": "GPU KV cache hit rate",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-      "title": "Number of Prefilling Requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 16 },
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-<<<<<<< HEAD
-<<<<<<< HEAD
-        { "expr": "vllm:num_prefill_requests", "editorMode": "builder", "legendFormat": "Prefilling Requests", "refId": "A", "range": true }
-      ]
-    },
-    {
-      "id": 8,
-      "type": "timeseries",
-      "title": "Number of Decoding Requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 16 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "vllm:num_decoding_requests", "editorMode": "builder", "legendFormat": "Decoding Requests", "refId": "A", "range": true }
-      ]
-    },
-    {
-      "id": 9,
-      "type": "stat",
-      "title": "Average Decoding Length",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 16 },
-=======
-        {
-          "expr": "vllm:gpu_prefix_cache_hit_rate",
-          "editorMode": "builder",
-          "legendFormat": "{{instance}}",
-          "refId": "A",
-          "range": true
-        }
-=======
-        { "expr": "vllm:num_prefill_requests", "editorMode": "builder", "legendFormat": "Prefilling Requests", "refId": "A", "range": true }
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-      ]
-    },
-    {
-      "id": 8,
-      "type": "timeseries",
-      "title": "Number of Decoding Requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-<<<<<<< HEAD
-      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 26 },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 16 },
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-<<<<<<< HEAD
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-<<<<<<< HEAD
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false },
-=======
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-<<<<<<< HEAD
-        { "expr": "vllm:avg_decoding_length", "editorMode": "builder", "legendFormat": "Avg. Decoding Length", "refId": "A", "range": true }
-      ]
-    },
-    {
-      "id": 102,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
-      "collapsed": false,
-      "title": "Serving Engine Load",
-      "type": "row",
-      "note": "Metrics indicating the load on the serving engine."
-=======
-        {
-          "expr": "vllm:current_qps",
-          "editorMode": "builder",
-          "legendFormat": "Current QPS",
-          "refId": "A",
-          "range": true
-        }
-=======
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "vllm:num_decoding_requests", "editorMode": "builder", "legendFormat": "Decoding Requests", "refId": "A", "range": true }
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-      ]
-    },
-    {
-      "id": 9,
-      "type": "stat",
-      "title": "Average Decoding Length",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 16 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false },
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "vllm:avg_decoding_length", "editorMode": "builder", "legendFormat": "Avg. Decoding Length", "refId": "A", "range": true }
-      ]
-    },
-    {
-<<<<<<< HEAD
-      "id": 12,
-      "type": "stat",
-      "title": "Average Prefill Length",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 26 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -714,34 +288,13 @@
           "range": true
         }
       ]
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-      "id": 102,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
-      "collapsed": false,
-      "title": "Serving Engine Load",
-      "type": "row",
-      "note": "Metrics indicating the load on the serving engine."
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
     },
     {
-      "id": 10,
+      "id": 7,
       "type": "timeseries",
-<<<<<<< HEAD
-<<<<<<< HEAD
-      "title": "Number of Running Requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
-=======
       "title": "Number of Prefilling Requests",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 26 },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-      "title": "Number of Running Requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 16 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -757,15 +310,16 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
       "targets": [
-<<<<<<< HEAD
-<<<<<<< HEAD
-        { "expr": "vllm:num_requests_running", "editorMode": "builder", "legendFormat": "{{instance}}", "refId": "A", "range": true }
-=======
         {
           "expr": "vllm:num_prefill_requests",
           "editorMode": "builder",
@@ -773,30 +327,14 @@
           "refId": "A",
           "range": true
         }
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-        { "expr": "vllm:num_requests_running", "editorMode": "builder", "legendFormat": "{{instance}}", "refId": "A", "range": true }
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
       ]
     },
     {
-      "id": 11,
+      "id": 8,
       "type": "timeseries",
-<<<<<<< HEAD
-<<<<<<< HEAD
-      "title": "Number of Pending Requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
-=======
       "title": "Number of Decoding Requests",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 16, "x": 0, "y": 33 },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-      "title": "Number of Pending Requests",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 16 },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -812,16 +350,151 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
       "targets": [
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
-        { "expr": "vllm:num_requests_waiting", "editorMode": "builder", "legendFormat": "{{instance}}", "refId": "A", "range": true }
+        {
+          "expr": "vllm:num_decoding_requests",
+          "editorMode": "builder",
+          "legendFormat": "Decoding Requests",
+          "refId": "A",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "stat",
+      "title": "Average Decoding Length",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 16 },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "expr": "vllm:avg_decoding_length",
+          "editorMode": "builder",
+          "legendFormat": "Avg. Decoding Length",
+          "refId": "A",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "collapsed": false,
+      "title": "Serving Engine Load",
+      "type": "row",
+      "note": "Metrics indicating the load on the serving engine."
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Number of Running Requests",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "expr": "vllm:num_requests_running",
+          "editorMode": "builder",
+          "legendFormat": "{{instance}}",
+          "refId": "A",
+          "range": true
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Number of Pending Requests",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "expr": "vllm:num_requests_waiting",
+          "editorMode": "builder",
+          "legendFormat": "{{instance}}",
+          "refId": "A",
+          "range": true
+        }
       ]
     },
     {
@@ -845,27 +518,27 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "single", "sort": "none" }
-<<<<<<< HEAD
       },
       "pluginVersion": "11.4.0",
       "targets": [
-        { "expr": "vllm:gpu_cache_usage_perc", "editorMode": "builder", "legendFormat": "{{instance}}", "refId": "A", "range": true }
-=======
         {
-          "expr": "vllm:num_decoding_requests",
+          "expr": "vllm:gpu_cache_usage_perc",
           "editorMode": "builder",
-          "legendFormat": "Decoding Requests",
+          "legendFormat": "{{instance}}",
           "refId": "A",
           "range": true
         }
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
       ]
     },
     {
       "id": 13,
-<<<<<<< HEAD
       "type": "timeseries",
       "title": "GPU KV Cache Hit Rate",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
@@ -873,15 +546,6 @@
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
-=======
-      "type": "stat",
-      "title": "Average Decoding Length",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 33 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "thresholds" },
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -894,13 +558,23 @@
         "overrides": []
       },
       "options": {
-<<<<<<< HEAD
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
       "targets": [
-        { "expr": "vllm:gpu_prefix_cache_hit_rate", "editorMode": "builder", "legendFormat": "{{instance}}", "refId": "A", "range": true }
+        {
+          "expr": "vllm:gpu_prefix_cache_hit_rate",
+          "editorMode": "builder",
+          "legendFormat": "{{instance}}",
+          "refId": "A",
+          "range": true
+        }
       ]
     },
     {
@@ -932,189 +606,23 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "node_gpu_usage_query", "editorMode": "builder", "legendFormat": "GPU Usage", "refId": "A", "range": true }
-      ]
-    },
-    {
-      "id": 15,
-      "type": "timeseries",
-      "title": "CPU Usage",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 6, "x": 6, "y": 42 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
         },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
         "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "node_cpu_usage_query", "editorMode": "builder", "legendFormat": "CPU Usage", "refId": "A", "range": true }
-      ]
-    },
-    {
-      "id": 16,
-      "type": "timeseries",
-      "title": "Memory Usage",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 42 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "node_memory_usage_query", "editorMode": "builder", "legendFormat": "Memory Usage", "refId": "A", "range": true }
-      ]
-    },
-    {
-      "id": 17,
-      "type": "timeseries",
-      "title": "Disk Usage",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 42 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "node_disk_usage_query", "editorMode": "builder", "legendFormat": "Disk Usage", "refId": "A", "range": true }
-=======
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
-        "textMode": "auto",
-        "wideLayout": true
       },
       "pluginVersion": "11.4.0",
       "targets": [
         {
-          "expr": "vllm:avg_decoding_length",
+          "expr": "node_gpu_usage_query",
           "editorMode": "builder",
-          "legendFormat": "Avg. Decoding Length",
+          "legendFormat": "GPU Usage",
           "refId": "A",
           "range": true
         }
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "vllm:gpu_cache_usage_perc", "editorMode": "builder", "legendFormat": "{{instance}}", "refId": "A", "range": true }
-      ]
-    },
-    {
-      "id": 13,
-      "type": "timeseries",
-      "title": "GPU KV Cache Hit Rate",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "vllm:gpu_prefix_cache_hit_rate", "editorMode": "builder", "legendFormat": "{{instance}}", "refId": "A", "range": true }
-      ]
-    },
-    {
-      "id": 103,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 },
-      "collapsed": false,
-      "title": "Current Resource Usage",
-      "type": "row",
-      "note": "Metrics for GPU, CPU, Memory and Disk usage."
-    },
-    {
-      "id": 14,
-      "type": "timeseries",
-      "title": "GPU Usage",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 42 },
-      "fieldConfig": {
-        "defaults": {
-          "color": { "mode": "palette-classic" },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "red", "value": 80 }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
-        "tooltip": { "mode": "single", "sort": "none" }
-      },
-      "pluginVersion": "11.4.0",
-      "targets": [
-        { "expr": "node_gpu_usage_query", "editorMode": "builder", "legendFormat": "GPU Usage", "refId": "A", "range": true }
       ]
     },
     {
@@ -1138,12 +646,23 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
       "targets": [
-        { "expr": "node_cpu_usage_query", "editorMode": "builder", "legendFormat": "CPU Usage", "refId": "A", "range": true }
+        {
+          "expr": "node_cpu_usage_query",
+          "editorMode": "builder",
+          "legendFormat": "CPU Usage",
+          "refId": "A",
+          "range": true
+        }
       ]
     },
     {
@@ -1167,12 +686,23 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
       "targets": [
-        { "expr": "node_memory_usage_query", "editorMode": "builder", "legendFormat": "Memory Usage", "refId": "A", "range": true }
+        {
+          "expr": "node_memory_usage_query",
+          "editorMode": "builder",
+          "legendFormat": "Memory Usage",
+          "refId": "A",
+          "range": true
+        }
       ]
     },
     {
@@ -1196,13 +726,23 @@
         "overrides": []
       },
       "options": {
-        "legend": { "calcs": [], "displayMode": "list", "placement": "right", "showLegend": true },
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
         "tooltip": { "mode": "single", "sort": "none" }
       },
       "pluginVersion": "11.4.0",
       "targets": [
-        { "expr": "node_disk_usage_query", "editorMode": "builder", "legendFormat": "Disk Usage", "refId": "A", "range": true }
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
+        {
+          "expr": "node_disk_usage_query",
+          "editorMode": "builder",
+          "legendFormat": "Disk Usage",
+          "refId": "A",
+          "range": true
+        }
       ]
     }
   ],
@@ -1214,20 +754,8 @@
   "time": { "from": "now-15m", "to": "now" },
   "timepicker": {},
   "timezone": "browser",
-<<<<<<< HEAD
-<<<<<<< HEAD
   "title": "vLLM Dashboard",
   "uid": "750918234",
   "version": 20,
-=======
-  "title": "vllm dashboard",
-  "uid": "ee9i0i4y606psc",
-  "version": 18,
->>>>>>> cccef7d (update vllm-dashboard and router to contain add on metrics such as coree vLLM metrics, operational metrics, router observe metrics, update requirement.txt for router and tests, update install-minikube-cluster to be more logging info, restart docker service and minikube context after the run)
-=======
-  "title": "vLLM Dashboard",
-  "uid": "750918234",
-  "version": 20,
->>>>>>> 694f804 (update the router and vllm-dashboard to align with the reference from @YuhanLiu11)
   "weekStart": ""
 }

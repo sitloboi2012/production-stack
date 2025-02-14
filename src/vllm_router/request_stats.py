@@ -44,6 +44,16 @@ class MovingAverageMonitor:
         self.values: Deque[float] = deque()
 
     def update(self, timestamp: float, value: float):
+        """
+        Update the throughput monitor with a new timestamp
+
+        Args:
+            timestamp: The timestamp of the data point.
+            value: The value of the data point.
+
+        This method adds the new data point to the sliding window and
+        removes any data point that is older than the sliding window size.
+        """
         self.timestamps.append(timestamp)
         self.values.append(value)
         while (

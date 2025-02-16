@@ -6,7 +6,15 @@ from vllm_router.log import init_logger
 
 logger = init_logger(__name__)
 
-_global_request_stats_monitor = None
+
+class SingletonMeta(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__call__(*args, **kwargs)
+            cls._instances[cls] = instance
+        return cls._instances[cls]
 
 
 @dataclass
@@ -67,7 +75,7 @@ class MovingAverageMonitor:
         return sum(self.values)
 
 
-class RequestStatsMonitor:
+class RequestStatsMonitor(metaclass=SingletonMeta):
     """
     Monitors the request statistics of all serving engines
     """
@@ -76,28 +84,22 @@ class RequestStatsMonitor:
     # arrived requests in the sliding window, but the inter_token_latency and
     # ttft are calculated based on the number of completed requests in the
     # sliding window.
-    def __init__(self, sliding_window_size: float):
-        """
-        Args:
-            sliding_window_size: The size of the sliding window (in seconds)
-                to store the request statistics
-        """
+    def __init__(self, sliding_window_size: float = None):
+        if hasattr(self, "_initialized"):
+            return
+        if sliding_window_size is None:
+            raise ValueError(
+                "RequestStatsMonitor must be initialized with sliding_window_size"
+            )
         self.sliding_window_size = sliding_window_size
-
-        # Finished requests for each serving engine
-        # The elements in the deque should be sorted by 'complete' time
         self.qps_monitors: Dict[str, MovingAverageMonitor] = {}
         self.ttft_monitors: Dict[str, MovingAverageMonitor] = {}
-
-        # The time when the request is coming (engine_url, request_id) -> timestamp
         self.request_coming_time: Dict[(str, str), float] = {}
-
-        # Number of requests in different stages (from the start of the router)
         self.in_prefill_requests: Dict[str, int] = {}
         self.in_decoding_requests: Dict[str, int] = {}
         self.finished_requests: Dict[str, int] = {}
-
         self.first_query_time = None
+        self._initialized = True
 
     def on_new_request(self, engine_url: str, request_id: str, timestamp: float):
         """
@@ -214,38 +216,8 @@ class RequestStatsMonitor:
 
 
 def InitializeRequestStatsMonitor(sliding_window_size: float):
-    """
-    Initialize the global request statistics monitor
-
-    Args:
-        sliding_window_size: The size of the sliding window (in seconds)
-            to store the request
-
-    Raises:
-        ValueError: If the global request statistics monitor has been initialized
-    """
-    global _global_request_stats_monitor
-    if _global_request_stats_monitor is not None:
-        raise ValueError("The global request statistics monitor has been initialized")
-
-    _global_request_stats_monitor = RequestStatsMonitor(sliding_window_size)
-    return _global_request_stats_monitor
+    return RequestStatsMonitor(sliding_window_size)
 
 
 def GetRequestStatsMonitor():
-    """
-    Get the global request statistics monitor
-
-    Returns:
-        The global request statistics monitor
-
-    Raises:
-        ValueError: If the global request statistics monitor has not been initialized
-    """
-    global _global_request_stats_monitor
-    if _global_request_stats_monitor is None:
-        raise ValueError(
-            "The global request statistics monitor has not been initialized"
-        )
-
-    return _global_request_stats_monitor
+    return RequestStatsMonitor()

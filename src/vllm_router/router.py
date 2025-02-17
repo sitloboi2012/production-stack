@@ -56,7 +56,7 @@ async def process_request(
     total_len = 0
     # Pass response headers to the client
     start_time = time.time()
-    GetRequestStatsMonitor().on_new_request(backend_url, request_id, start_time)
+    app.state.request_stats_monitor.on_new_request(backend_url, request_id, start_time)
 
     client = httpx_client_wrapper()
     async with client.stream(
@@ -68,17 +68,18 @@ async def process_request(
     ) as backend_response:
         yield backend_response.headers, backend_response.status_code
 
-        # Stream response content
         async for chunk in backend_response.aiter_bytes():
             total_len += len(chunk)
             if not first_token:
                 first_token = True
-                GetRequestStatsMonitor().on_request_response(
+                app.state.request_stats_monitor.on_request_response(
                     backend_url, request_id, time.time()
                 )
             yield chunk
 
-    GetRequestStatsMonitor().on_request_complete(backend_url, request_id, time.time())
+    app.state.request_stats_monitor.on_request_complete(
+        backend_url, request_id, time.time()
+    )
 
     # if debug_request:
     #    logger.debug(f"Finished the request with request id: {debug_request.headers.get('x-request-id', None)} at {time.time()}")
@@ -91,8 +92,6 @@ async def route_general_request(request: Request, endpoint: str):
     """
     in_router_time = time.time()
     request_id = str(uuid.uuid4())
-
-    # TODO (ApostaC): merge two awaits into one
     request_body = await request.body()
     request_json = await request.json()
     requested_model = request_json.get("model", None)
@@ -102,9 +101,12 @@ async def route_general_request(request: Request, endpoint: str):
             content={"error": "Invalid request: missing 'model' in request body."},
         )
 
+    # TODO (ApostaC): merge two awaits into one
     endpoints = GetServiceDiscovery().get_endpoint_info()
-    engine_stats = GetEngineStatsScraper().get_engine_stats()
-    request_stats = GetRequestStatsMonitor().get_request_stats(time.time())
+    engine_stats = request.app.state.engine_stats_scraper.get_engine_stats()
+    request_stats = request.app.state.request_stats_monitor.get_request_stats(
+        time.time()
+    )
 
     endpoints = list(filter(lambda x: x.model_name == requested_model, endpoints))
     if len(endpoints) == 0:
@@ -112,7 +114,7 @@ async def route_general_request(request: Request, endpoint: str):
             status_code=400, content={"error": f"Model {requested_model} not found."}
         )
 
-    server_url = GetRoutingLogic().route_request(
+    server_url = request.app.state.router.route_request(
         endpoints, engine_stats, request_stats, request
     )
 
@@ -529,7 +531,7 @@ def InitializeAll(args):
     else:
         raise ValueError(f"Invalid service discovery type: {args.service_discovery}")
 
-    # Initialize singletons by calling their constructors with required parameters.
+    # Initialize singletons via custom functions.
     InitializeEngineStatsScraper(args.engine_stats_interval)
     InitializeRequestStatsMonitor(args.request_stats_window)
 
@@ -544,14 +546,19 @@ def InitializeAll(args):
 
     InitializeRoutingLogic(args.routing_logic, session_key=args.session_key)
 
+    # --- Hybrid addition: attach singletons to FastAPI state ---
+    app.state.engine_stats_scraper = GetEngineStatsScraper()
+    app.state.request_stats_monitor = GetRequestStatsMonitor()
+    app.state.router = GetRoutingLogic()
+
 
 def log_stats(interval: int = 10):
     while True:
         time.sleep(interval)
         logstr = "\n" + "=" * 50 + "\n"
         endpoints = GetServiceDiscovery().get_endpoint_info()
-        engine_stats = GetEngineStatsScraper().get_engine_stats()
-        request_stats = GetRequestStatsMonitor().get_request_stats(time.time())
+        engine_stats = app.state.engine_stats_scraper.get_engine_stats()
+        request_stats = app.state.request_stats_monitor.get_request_stats(time.time())
         for endpoint in endpoints:
             url = endpoint.url
             logstr += f"Server: {url}\n"

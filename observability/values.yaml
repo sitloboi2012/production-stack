@@ -15,7 +15,7 @@ kubeScheduler:
 
 ## Component scraping etcd
 ##
-# Disabled because it's being managed by DOKS, so it's not accessible
+# Disabled because it's being managed by DOKS, so metrics are not accessible
 kubeEtcd:
   enabled: false
 
@@ -91,9 +91,16 @@ prometheusOperator:
 prometheus:
   enabled: true
 
+  # Add a static scrape configuration to target your FastAPI router.
+  prometheusSpec:
+    additionalScrapeConfigs: |
+      - job_name: 'fastapi-router'
+        scrape_interval: 15s
+        static_configs:
+          - targets: ['localhost:8000']
+
   ## Starter Kit components service monitors
   #
-  # Uncomment the following section to enable emojivoto service monitoring
   additionalServiceMonitors:
     - name: "test-vllm-monitor2"
       selector:
@@ -109,58 +116,4 @@ prometheus:
 
   # # Uncomment the following section to enable ingress-nginx service monitoring
   #   - name: "ingress-nginx-monitor"
-  #     selector:
-  #       matchLabels:
-  #         app.kubernetes.io/name: ingress-nginx
-  #     namespaceSelector:
-  #       matchNames:
-  #         - ingress-nginx
-  #     endpoints:
-  #       - port: "metrics"
-
-  # # Uncomment the following section to enable Loki service monitoring
-  #   - name: "loki-monitor"
-  #     selector:
-  #       matchLabels:
-  #         app: loki
-  #         release: loki
-  #     namespaceSelector:
-  #       matchNames:
-  #         - loki-stack
-  #     endpoints:
-  #       - port: "http-metrics"
-
-  # # Uncomment the following section to enable Promtail service monitoring
-  #   - name: "promtail-monitor"
-  #     selector:
-  #       matchLabels:
-  #         app: promtail
-  #         release: loki
-  #     namespaceSelector:
-  #       matchNames:
-  #         - loki-stack
-  #     endpoints:
-  #       - port: "http-metrics"
-
-  ## Prometheus StorageSpec for persistent data
-  ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/user-guides/storage.md
-  ##
-  # prometheusSpec:
-  #   affinity:
-  #     nodeAffinity:
-  #       preferredDuringSchedulingIgnoredDuringExecution:
-  #       - weight: 1
-  #         preference:
-  #           matchExpressions:
-  #           - key: preferred
-  #             operator: In
-  #             values:
-  #             - observability
-    # storageSpec:
-    #   volumeClaimTemplate:
-    #     spec:
-    #       storageClassName: do-block-storage
-    #       accessModes: ["ReadWriteOnce"]
-    #       resources:
-    #         requests:
-    #           storage: 5Gi
+  #     REMEMBER TO ADD ON THE STUFF LATER

@@ -16,6 +16,7 @@ fi
 
 # Use this command when testing with static service discovery
 python3 -m vllm_router.router --port "$1" \
+    --host 127.0.0.1 \
     --service-discovery static \
     --static-backends "http://localhost:9000" \
     --static-models "fake_model_name" \
